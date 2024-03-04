@@ -53,12 +53,28 @@ async def my_event_handler(event):
             to_peer = await client.get_input_entity(int(to_peer_id))
 
             if top_msg_id is not None:
-                await client.send_message(
-                    entity=to_peer,
-                    message=new_message,
-                    reply_to=int(top_msg_id)  # Convert to int if it's a string
-                )
+                # Check if the message has media
+                if event.message.media:
+                    await client.send_file(
+                         entity=to_peer,
+                         file=event.message.media,
+                         caption=new_message,
+                         reply_to=int(top_msg_id)  # Convert to int if it's a string
+                    )
+                else:
+                    await client.send_message(
+                        entity=to_peer,
+                        message=new_message,
+                        reply_to=int(top_msg_id)  # Convert to int if it's a string
+                    )
             else:
+                # Check if the message has media
+                if event.message.media:
+                    await client.send_file(
+                         entity=to_peer,
+                         file=event.message.media,
+                         caption=new_message
+                    )
                 await client.send_message(
                     entity=to_peer,
                     message=new_message
