@@ -11,7 +11,6 @@ api_hash = getenv("API_HASH")
 # bot_token = 'bot_token'
 
 source = [-1002129953530,-1001826070260]
-destination = int(getenv("DESTINATION"))
 
 client = TelegramClient('anon', api_id, api_hash)
 
@@ -25,10 +24,18 @@ async def my_event_handler(event):
     sender = await event.message.get_sender()
 
     # Check if the post_author attribute is available
-    post_author = event.message.post_author if event.message.post_author else "Unknown" 
+    post_author = event.message.post_author 
 
-    # Create a new message with the sender's name and the original message text
-    new_message = f"頻道:{sender.title}\n來自:{post_author}\n\n{event.message.text}"
+    # Create a new message with the sender's name, post author's name (if available), and the original message text
+    if post_author:
+        new_message = f"Message from:\nChannel: {sender.title}\nPost Author: {post_author}\n{event.message.text}"
+    else:
+        new_message = f"Message from:\nChannel: {sender.title}\n{event.message.text}"
+
+    to_peers = {
+            '-1002013334245': '575',
+            '-1002027620537': None
+            }
 
     # await client(functions.messages.ForwardMessagesRequest(
     #     from_peer=event.chat_id,
@@ -45,7 +52,21 @@ async def my_event_handler(event):
     #     reply_to=top_msg_id
     # ))
 
-    await client.send_message(to_peer, new_message, reply_to=top_msg_id) 
+    for to_peer_id, top_msg_id in to_peers.items():
+            to_peer = await client.get_input_entity(to_peer_id)
+
+            if top_msg_id is not None:
+                await client.send_message(
+                    entity=to_peer,
+                    message=new_message,
+                    reply_to=int(top_msg_id)  # Convert to int if it's a string
+                )
+            else:
+                await client.send_message(
+                    entity=to_peer,
+                    message=new_message
+                )
+
 
 with client:
     client.run_until_disconnected()
