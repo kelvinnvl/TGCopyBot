@@ -1,6 +1,5 @@
-from telethon import TelegramClient, events, functions, types
-from telethon.helpers import generate_random_long
-from telethon.tl.functions.messages import SendMessageRequest
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from dotenv import load_dotenv, find_dotenv
 from os import getenv
 
@@ -8,16 +7,19 @@ load_dotenv(find_dotenv())
 
 api_id = getenv("API_ID")
 api_hash = getenv("API_HASH")
-# bot_token = 'bot_token'
+session_string = getenv("SESSION_STRING")
 
 source = [-1002129953530,-1001826070260]
 
-client = TelegramClient('anon', api_id, api_hash)
+client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
 @client.on(events.NewMessage(chats=(source)))
 async def my_event_handler(event):
     # Replace 'to_supergroup_id' and 'top_msg_id' with your actual values
-    to_peer = await client.get_input_entity(destination)
+    to_peers = {
+            '-1002013334245': '575',
+            '-1002027620537': None
+            }
     top_msg_id = 575  # ID of the message to reply to (the 'topic')
     
     # Get the sender
@@ -32,10 +34,6 @@ async def my_event_handler(event):
     else:
         new_message = f"Message from:\nChannel: {sender.title}\n{event.message.text}"
 
-    to_peers = {
-            '-1002013334245': '575',
-            '-1002027620537': None
-            }
 
     # await client(functions.messages.ForwardMessagesRequest(
     #     from_peer=event.chat_id,

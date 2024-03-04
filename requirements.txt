@@ -3,6 +3,7 @@ python-dotenv==0.13.0
 telegram-text==0.1.1
 # pyrogram
 telethon==1.34.0
+asyncio
 # aiogram==3.4.1
 # python-telegram-bot==20.8
 # pyyaml
