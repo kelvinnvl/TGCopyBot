@@ -1,94 +1,51 @@
+from telethon import TelegramClient, events, functions, types
+from telethon.helpers import generate_random_long
+from telethon.tl.functions.messages import SendMessageRequest
 from dotenv import load_dotenv, find_dotenv
 from os import getenv
-from sys import exit
-from telegram.client import Telegram
 
 load_dotenv(find_dotenv())
 
-######################
-# App Configurations #
-######################
+api_id = getenv("API_ID")
+api_hash = getenv("API_HASH")
+# bot_token = 'bot_token'
 
-src_chat = getenv("SOURCE") or None
-dst_chat = getenv("DESTINATION") or None
+source = [-1002129953530,-1001826070260]
+destination = int(getenv("DESTINATION"))
 
-###########################
-# Telegram Configurations #
-###########################
+client = TelegramClient('anon', api_id, api_hash)
 
-tg = Telegram(
-    api_id=getenv("API_ID"),
-    api_hash=getenv("API_HASH"),
+@client.on(events.NewMessage(chats=(source)))
+async def my_event_handler(event):
+    # Replace 'to_supergroup_id' and 'top_msg_id' with your actual values
+    to_peer = await client.get_input_entity(destination)
+    top_msg_id = 575  # ID of the message to reply to (the 'topic')
+    
+    # Get the sender
+    sender = await event.message.get_sender()
 
-    phone=getenv("PHONE"),
+    # Check if the post_author attribute is available
+    post_author = event.message.post_author if event.message.post_author else "Unknown" 
 
-    database_encryption_key=getenv("DB_PASSWORD"),
-    files_directory=getenv("FILES_DIRECTORY"),
+    # Create a new message with the sender's name and the original message text
+    new_message = f"頻道:{sender.title}\n來自:{post_author}\n\n{event.message.text}"
 
-    proxy_server=getenv("PROXY_SERVER"),
-    proxy_port=getenv("PROXY_PORT"),
-    proxy_type={
-          # 'proxyTypeSocks5', 'proxyTypeMtproto', 'proxyTypeHttp'
-          '@type': getenv("PROXY_TYPE"),
-    },
-)
+    # await client(functions.messages.ForwardMessagesRequest(
+    #     from_peer=event.chat_id,
+    #     id=[event.message.id],
+    #     to_peer=to_peer,
+    #     drop_author=True,
+    #     random_id=[generate_random_long()],
+    #     top_msg_id=int(top_msg_id)  # Convert to int if it's a string
+    # ))
 
-###############
-# App methods #
-###############
+    # await client(SendMessageRequest(
+    #     peer=to_peer,
+    #     message=event.message.message,
+    #     reply_to=top_msg_id
+    # ))
 
-def copy_message(from_chat_id: int, message_id: int, send_copy: bool = True) -> None:
-    data = {
-        'chat_id': dst_chat,
-        'from_chat_id': from_chat_id,
-        'message_ids': [message_id],
-        'send_copy': send_copy,
-    }
-    result = tg.call_method(method_name='forwardMessages', params=data, block=True)
-    # print(result.update)
+    await client.send_message(to_peer, new_message, reply_to=top_msg_id) 
 
-
-def new_message_handler(update):
-    # To print every update:
-    # print(update)
-
-    # We want to process only new messages
-    if 'sending_state' in update['message']:
-        return
-
-    message_chat_id = update['message']['chat_id']
-    message_id = update['message']['id']
-
-    # We want to process only messages from specific channel
-    if message_chat_id != src_chat:
-        return
-
-    # Check if message is forwarded
-    if 'forward_info' in update['message']:
-        copy_message(message_chat_id, message_id, False)
-    else:
-        copy_message(message_chat_id, message_id)
-
-
-if __name__ == "__main__":
-    tg.login()
-    result = tg.get_chats()
-
-    result = tg.get_chats(9223372036854775807)  # const 2^62-1: from the first
-    result.wait()
-    chats = result.update['chat_ids']
-    for chat_id in chats:
-        r = tg.get_chat(chat_id)
-        r.wait()
-        title = r.update['title']
-        print(f"{chat_id}, {title}")
-
-    if (src_chat is None or dst_chat is None):
-        print("\nPlease enter SOURCE and DESTINATION in .env file")
-        exit(1)
-    else:
-        src_chat = int(src_chat)
-        dst_chat = int(dst_chat)
-
-    tg.add_message_handler(new_message_handler)
-    tg.idle()
+with client:
+    client.run_until_disconnected()
