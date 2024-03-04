@@ -9,7 +9,7 @@ api_id = getenv("API_ID")
 api_hash = getenv("API_HASH")
 session_string = getenv("SESSION_STRING")
 
-source = [-1002129953530,-1001826070260]
+source = [-1002129953530,-1001826070260,-1002129953530]
 
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
