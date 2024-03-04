@@ -9,7 +9,7 @@ api_id = getenv("API_ID")
 api_hash = getenv("API_HASH")
 session_string = getenv("SESSION_STRING")
 
-source = [-1002129953530,-1001826070260,-1002129953530]
+source = [-1002129953530,-1001826070260,-1001924828244]
 
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
@@ -20,7 +20,6 @@ async def my_event_handler(event):
             '-1002013334245': '575',
             '-1002027620537': None
             }
-    top_msg_id = 575  # ID of the message to reply to (the 'topic')
     
     # Get the sender
     sender = await event.message.get_sender()
@@ -30,9 +29,9 @@ async def my_event_handler(event):
 
     # Create a new message with the sender's name, post author's name (if available), and the original message text
     if post_author:
-        new_message = f"Message from:\nChannel: {sender.title}\nPost Author: {post_author}\n{event.message.text}"
+        new_message = f"頻道: {sender.title}\n來自: {post_author}\n{event.message.text}"
     else:
-        new_message = f"Message from:\nChannel: {sender.title}\n{event.message.text}"
+        new_message = f"頻道: {sender.title}\n{event.message.text}"
 
 
     # await client(functions.messages.ForwardMessagesRequest(
@@ -51,7 +50,7 @@ async def my_event_handler(event):
     # ))
 
     for to_peer_id, top_msg_id in to_peers.items():
-            to_peer = await client.get_input_entity(to_peer_id)
+            to_peer = await client.get_input_entity(int(to_peer_id))
 
             if top_msg_id is not None:
                 await client.send_message(
