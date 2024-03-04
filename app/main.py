@@ -75,11 +75,11 @@ async def my_event_handler(event):
                          file=event.message.media,
                          caption=new_message
                     )
-                await client.send_message(
-                    entity=to_peer,
-                    message=new_message
-                )
-
+                else:
+                    await client.send_message(
+                        entity=to_peer,
+                        message=new_message
+                    )
 
 with client:
     client.run_until_disconnected()
