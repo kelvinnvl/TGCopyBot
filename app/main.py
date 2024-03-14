@@ -17,8 +17,9 @@ client = TelegramClient(StringSession(session_string), api_id, api_hash)
 async def my_event_handler(event):
     # Replace 'to_supergroup_id' and 'top_msg_id' with your actual values
     to_peers = {
-            '-1002013334245': '575',
-            '-1002027620537': None
+            int('-1002013334245'): '575',
+            int('-1002027620537'): None,
+            'Xxm0nsterxX': None
             }
     
     # Get the sender
@@ -50,7 +51,7 @@ async def my_event_handler(event):
     # ))
 
     for to_peer_id, top_msg_id in to_peers.items():
-            to_peer = await client.get_input_entity(int(to_peer_id))
+            to_peer = await client.get_input_entity(to_peer_id)
 
             if top_msg_id is not None:
                 # Check if the message has media
